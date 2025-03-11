@@ -1,12 +1,4 @@
-interface Question {
-  id: string;
-  text: string;
-  type: "multiple-choice";
-  options: string[];
-  correctAnswer: string;
-  successMessage: string;
-  failMessage: string;
-}
+import { Question } from "@/shared/types";
 
 export async function generateQuiz(
   text: string,

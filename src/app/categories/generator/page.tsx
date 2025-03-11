@@ -15,14 +15,14 @@ const LEVEL_OPTIONS: { value: Level; label: string }[] = [
 
 export default function CategoryGenerator() {
   const [formData, setFormData] = useState<GeneratorRequest>({
-    title: "",
-    topics: [],
-    numberOfStories: 3,
-    numberOfQuizzes: 3,
+    title: "Family and Friends",
+    topics: ["Family", "Friends"],
+    numberOfStories: 1,
+    numberOfQuizzes: 1,
     quizTypes: ["multiple-choice"],
     level: "A2",
-    includeAudio: false,
-    includeImage: false,
+    includeAudio: true,
+    includeImage: true,
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);

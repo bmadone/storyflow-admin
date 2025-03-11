@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
-import { GeneratorRequest } from "@/shared/types";
+import { GeneratorRequest, Story } from "@/shared/types";
 import { generateStories } from "./stories-generator";
 import { generateQuiz } from "./quiz-generator";
+import { generateImage } from "./image-generator";
 
-async function generate(body: GeneratorRequest): Promise<string[]> {
+async function generate(body: GeneratorRequest): Promise<Story[]> {
   const stories = await generateStories(
     body.title,
     body.topics,
@@ -11,7 +12,23 @@ async function generate(body: GeneratorRequest): Promise<string[]> {
     body.numberOfStories
   );
 
-  return stories;
+  const data: Story[] = [];
+  for (const story of stories) {
+    // Generate image
+    const image = body.includeImage
+      ? await generateImage(body.topics.join(", "))
+      : null;
+
+    // Generate audio
+    const audio = null;
+
+    // Generate quizes
+    const quizes = await generateQuiz(story, body.numberOfQuizzes);
+
+    data.push({ story, image, audio, quizes });
+  }
+
+  return data;
 }
 
 export async function POST(request: Request) {
@@ -19,17 +36,10 @@ export async function POST(request: Request) {
     const body: GeneratorRequest = await request.json();
     const stories = await generate(body);
 
-    const result = [];
-    for (const story of stories) {
-      const quiz = await generateQuiz(story, body.numberOfQuizzes);
-      result.push({ story, quiz });
-    }
-    console.log("result", result);
-
     return NextResponse.json({
       success: true,
       message: "Category generated successfully",
-      data: result,
+      data: stories,
     });
   } catch (error) {
     console.error("Error generating category:", error);
