@@ -13,13 +13,6 @@ export interface GeneratorRequest {
   includeImage: boolean;
 }
 
-export interface Story {
-  story: string;
-  image: string | null;
-  audio: string | null;
-  quizes: Question[];
-}
-
 export interface Question {
   id: string;
   text: string;

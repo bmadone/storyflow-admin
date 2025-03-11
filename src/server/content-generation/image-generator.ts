@@ -2,9 +2,11 @@ import OpenAI from "openai";
 
 const openai = new OpenAI();
 
-export async function generateImage(story: string): Promise<string | null> {
+export async function generateImage(topics: string[]): Promise<string | null> {
   try {
-    const prompt = `create image that summarize ${story}, would be used in e-learning app as a cover for the story`;
+    const prompt = `create image that summarize ${topics.join(
+      ", "
+    )}, would be used in e-learning app as a cover for the story`;
     const response = await openai.images.generate({
       model: "dall-e-3",
       prompt,

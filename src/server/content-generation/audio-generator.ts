@@ -4,10 +4,7 @@ const elevenlabs = new ElevenLabsClient({
   apiKey: process.env.ELEVEN_LABS_API_KEY,
 });
 
-// Using Sarah voice as default - one of the most natural-sounding voices
 const VOICE_NAME = "Sarah";
-
-// Using the latest multilingual model for best quality and language support
 const MODEL_ID = "eleven_multilingual_v2";
 
 export async function generateAudio(story: string): Promise<string | null> {
@@ -17,7 +14,6 @@ export async function generateAudio(story: string): Promise<string | null> {
       return null;
     }
 
-    // Generate audio using ElevenLabs API
     const audioData = await elevenlabs.generate({
       text: story,
       voice: VOICE_NAME,
