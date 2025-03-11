@@ -3,6 +3,7 @@ import { GeneratorRequest, Story } from "@/shared/types";
 import { generateStories } from "./stories-generator";
 import { generateQuiz } from "./quiz-generator";
 import { generateImage } from "./image-generator";
+import { generateAudio } from "./audio-generator";
 
 async function generate(body: GeneratorRequest): Promise<Story[]> {
   const stories = await generateStories(
@@ -14,18 +15,15 @@ async function generate(body: GeneratorRequest): Promise<Story[]> {
 
   const data: Story[] = [];
   for (const story of stories) {
-    // Generate image
-    const image = body.includeImage
-      ? await generateImage(body.topics.join(", "))
-      : null;
-
-    // Generate audio
-    const audio = null;
-
-    // Generate quizes
-    const quizes = await generateQuiz(story, body.numberOfQuizzes);
-
-    data.push({ story, image, audio, quizes });
+    Promise.all([
+      body.includeImage ? await generateImage(body.topics.join(", ")) : null,
+      body.includeAudio ? await generateAudio(story) : null,
+      body.numberOfQuizzes > 0
+        ? await generateQuiz(story, body.numberOfQuizzes)
+        : [],
+    ]).then(([image, audio, quizes]) => {
+      data.push({ story, image, audio, quizes });
+    });
   }
 
   return data;
