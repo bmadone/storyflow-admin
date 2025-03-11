@@ -1,41 +1,42 @@
 import { NextResponse } from "next/server";
+import { GeneratorRequest } from "@/shared/types";
+import { generateAudio } from "./audio-generator";
+import { generateImage } from "./image-generator";
+import { generateStories } from "./stories-generator";
+import { generateQuiz } from "./quiz-generator";
 
-type QuizType = "multiple-choice" | "yes-no";
+async function generate(body: GeneratorRequest) {
+  const stories = await generateStories(
+    body.title,
+    body.topics,
+    body.level,
+    body.numberOfStories
+  );
 
-interface GeneratorRequest {
-  topics: string;
-  numberOfStories: number;
-  numberOfQuizzes: number;
-  quizTypes: QuizType[];
-  level: string;
-  includeAudio: boolean;
-  includeImage: boolean;
+  return await Promise.all(
+    stories.map(async (story) => {
+      const [imageUrl, audioUrl] = await Promise.all([
+        body.includeImage ? generateImage(story) : null,
+        body.includeAudio ? generateAudio(story) : null,
+      ]);
+
+      return { story, imageUrl, audioUrl };
+    })
+  );
 }
 
 export async function POST(request: Request) {
   try {
     const body: GeneratorRequest = await request.json();
+    const stories = await generate(body);
+    console.log("stories", stories);
 
-    // TODO: Implement actual generation logic
-    // For now, just return the received data
-    const generatedCategory = {
-      id: Date.now().toString(),
-      title: body.topics.split(",")[0].trim(),
-      stories: Array(body.numberOfStories).fill({
-        title: "Sample Story",
-        content: "Story content will be generated here",
-      }),
-      quizzes: Array(body.numberOfQuizzes).fill({
-        type: body.quizTypes[0],
-        questions: ["Sample question"],
-      }),
-      level: body.level,
-      hasAudio: body.includeAudio,
-      hasImage: body.includeImage,
-    };
-
-    return NextResponse.json(generatedCategory);
+    for (const story of stories) {
+      const quiz = await generateQuiz(story.story, body.level);
+      console.log("quiz", quiz);
+    }
   } catch (error) {
+    console.error("Error generating category:", error);
     return NextResponse.json(
       { error: "Failed to generate category" },
       { status: 500 }

@@ -97,3 +97,21 @@
 .select:hover {
   border-color: #0070f3;
 }
+
+.error {
+  background-color: #fee2e2;
+  border: 1px solid #ef4444;
+  color: #dc2626;
+  padding: 1rem;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+}
+
+.generateButton:disabled {
+  background-color: #9ca3af;
+  cursor: not-allowed;
+}
+
+.generateButton:disabled:hover {
+  background-color: #9ca3af;
+}

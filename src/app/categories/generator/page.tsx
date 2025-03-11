@@ -2,24 +2,10 @@
 
 import { useState } from "react";
 import styles from "./generator.module.css";
-
-interface GeneratorForm {
-  topics: string[];
-  numberOfStories: number;
-  numberOfQuizzes: number;
-  quizTypes: QuizType[];
-  level: Level;
-  includeAudio: boolean;
-  includeImage: boolean;
-}
-
-type Level = "A1" | "A2";
-
-type QuizType = "multiple-choice" | "boolean";
+import { QuizType, Level, GeneratorRequest } from "@/shared/types";
 
 const QUIZ_TYPE_OPTIONS: { value: QuizType; label: string }[] = [
   { value: "multiple-choice", label: "Multiple Choice" },
-  { value: "boolean", label: "Boolean" },
 ];
 
 const LEVEL_OPTIONS: { value: Level; label: string }[] = [
@@ -28,20 +14,48 @@ const LEVEL_OPTIONS: { value: Level; label: string }[] = [
 ];
 
 export default function CategoryGenerator() {
-  const [formData, setFormData] = useState<GeneratorForm>({
+  const [formData, setFormData] = useState<GeneratorRequest>({
+    title: "",
     topics: [],
-    numberOfStories: 8,
-    numberOfQuizzes: 6,
-    quizTypes: ["multiple-choice", "boolean"],
+    numberOfStories: 3,
+    numberOfQuizzes: 3,
+    quizTypes: ["multiple-choice"],
     level: "A2",
-    includeAudio: true,
-    includeImage: true,
+    includeAudio: false,
+    includeImage: false,
   });
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Implement generation logic
-    console.log("Form submitted:", formData);
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const response = await fetch("/api/categories/generator", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to generate category");
+      }
+
+      const data = await response.json();
+      console.log("data", data);
+
+      // Redirect to the categories page after successful generation
+      // window.location.href = "/categories";
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Something went wrong");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleQuizTypeChange = (type: QuizType) => {
@@ -57,7 +71,21 @@ export default function CategoryGenerator() {
     <div className={styles.container}>
       <h1>Category generator</h1>
 
+      {error && <div className={styles.error}>{error}</div>}
+
       <form onSubmit={handleSubmit} className={styles.form}>
+        <div className={styles.formGroup}>
+          <label htmlFor="title">Title:</label>
+          <input
+            type="text"
+            id="title"
+            value={formData.title}
+            onChange={(e) =>
+              setFormData({ ...formData, title: e.target.value })
+            }
+          />
+        </div>
+
         <div className={styles.formGroup}>
           <label htmlFor="topics">Topics:</label>
           <input
@@ -164,8 +192,12 @@ export default function CategoryGenerator() {
           </label>
         </div>
 
-        <button type="submit" className={styles.generateButton}>
-          Generate
+        <button
+          type="submit"
+          className={styles.generateButton}
+          disabled={isLoading}
+        >
+          {isLoading ? "Generating..." : "Generate"}
         </button>
       </form>
     </div>

@@ -25,7 +25,7 @@ export default async function CategoriesPage() {
     <div className={styles.container}>
       <div className={styles.header}>
         <h1>Categories</h1>
-        <Link href="/categories/new" className={styles.addButton}>
+        <Link href="/categories/generator" className={styles.addButton}>
           Add Category
         </Link>
       </div>
