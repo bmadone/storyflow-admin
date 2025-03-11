@@ -6,6 +6,8 @@ export async function generateStories(
   level: Level,
   numberOfStories: number
 ): Promise<string[]> {
+  const separator = "---";
+
   const result = await fetch("https://api.openai.com/v1/chat/completions", {
     method: "POST",
     headers: {
@@ -24,7 +26,7 @@ export async function generateStories(
           role: "user",
           content: `Generate ${numberOfStories} stories for level ${level} with title ${title} about the topics: ${topics.join(
             ", "
-          )}`,
+          )} each story should be separated with ${separator}, and contain only text, without any formatting, or numbers`,
         },
       ],
     }),
@@ -33,10 +35,6 @@ export async function generateStories(
   const data = await result.json();
   const content = data.choices[0].message.content;
 
-  // Split the content into individual stories
-  const stories = content
-    .split(/\d+\.\s+/) // Split by numbers followed by a period and whitespace
-    .filter((story: string) => story.trim().length > 0); // Remove empty strings
-
+  const stories = content.split(separator).map((story: string) => story.trim());
   return stories;
 }

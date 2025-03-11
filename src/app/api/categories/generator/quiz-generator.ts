@@ -1,5 +1,3 @@
-import { Level } from "@/shared/types";
-
 interface Question {
   id: string;
   text: string;
@@ -12,7 +10,7 @@ interface Question {
 
 export async function generateQuiz(
   text: string,
-  level: Level
+  numberOfQuizzes: number
 ): Promise<Question[]> {
   const result = await fetch("https://api.openai.com/v1/chat/completions", {
     method: "POST",
@@ -26,7 +24,7 @@ export async function generateQuiz(
         {
           role: "system",
           content: `You are a helpful assistant that generates language learning quizzes using Teaching Proficiency through Reading and Storytelling (TPRS) method. 
-					Generate questions suitable for ${level} level learners.
+					Generate ${numberOfQuizzes} questions.
 					Each question should:
 					- Be clear and straightforward
 					- Have 4 options (A, B, C, D)
